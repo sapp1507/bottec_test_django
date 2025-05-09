@@ -41,13 +41,10 @@ async def add_back_button(
         return
 
     back_data = 'category_page_1'
-    # if model_name == 'category':
-    #     back_data = 'category_page_1'
     if model_name == 'subcategory':
         back_data = f'category_{parent_id}_page_1'
     elif model_name == 'products':
         back_data = f'subcategory_{parent_id}_page_1'
-    ic(back_data)
     builder.row(
         InlineKeyboardButton(
             text='↩️ Назад',

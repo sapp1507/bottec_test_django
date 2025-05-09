@@ -6,7 +6,7 @@ from aiogram.types import TelegramObject, User
 from django.utils.html import avoid_wrapping
 
 from bot.loader import GROUP_CHAT_ID, bot
-from orders.models import TGUser, Cart
+from orders.models import Cart, TGUser
 
 last_messages_ids = {}
 
@@ -21,7 +21,6 @@ class UserMiddleware(BaseMiddleware):
         tg_user: Optional[User] = self._extract_user(event)
         if tg_user:
             user = await self._update_or_create_user(tg_user)
-            await Cart.objects.aget_or_create(tg_user=user)
             user_channel_status = await bot.get_chat_member(
                 chat_id=GROUP_CHAT_ID,
                 user_id=tg_user.id
@@ -35,11 +34,7 @@ class UserMiddleware(BaseMiddleware):
                         'Для работы с ботом необходимо присоединиться к каналу https://t.me/bottecnotec_test'
                     )
                 )
-                await event.delete()
                 return
-            else:
-                user.is_subscribe = True
-                await user.asave()
 
         return await handler(event, data)
 
@@ -62,6 +57,7 @@ class UserMiddleware(BaseMiddleware):
                 'full_name': tg_user.full_name,
             }
         )
+        await Cart.objects.aget_or_create(tg_user=obj)
 
         changed = False
 

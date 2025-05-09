@@ -2,11 +2,10 @@ from aiogram import F, Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile, Message
-from asgiref.sync import sync_to_async
 
 from bot.keyboards import user as kb
 from bot.states.user import OrderStates
-from orders.models import TGUser, CartItem, Cart, Order, OrderItem
+from orders.models import Cart, CartItem, Order, OrderItem, TGUser
 from products.models import Product
 from utils.converter import to_rub
 

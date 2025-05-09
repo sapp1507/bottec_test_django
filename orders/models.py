@@ -1,4 +1,3 @@
-from asgiref.sync import sync_to_async
 from django.db import models
 
 from products.models import Product
@@ -20,7 +19,6 @@ class TGUser(TimeModel):
     user_id = models.BigIntegerField(unique=True, verbose_name='Телеграм ID')
     username = models.CharField(max_length=100, null=True, blank=True, verbose_name='Имя пользователя')
     full_name = models.CharField(max_length=100, null=True, blank=True, verbose_name='ФИО')
-    is_subscribe = models.BooleanField(default=False, verbose_name='Подписка')
 
     def __str__(self):
         return f'{self.username if self.username else ""}(@{self.username})'
