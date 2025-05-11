@@ -1,22 +1,24 @@
-from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
-                           KeyboardButton, ReplyKeyboardMarkup)
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from asgiref.sync import sync_to_async
 
+from bot.handlers.utils import get_main_menu_button
 from bot.keyboards.utils import add_back_button, build_pagination_button
+from orders.models import Order
 from products.models import Category, Product, SubCategory
 
 ITEMS_PER_PAGE = 2
 
 
-user_keyboard = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text='Каталог')],
-        [KeyboardButton(text='Корзина'), KeyboardButton(text='Мои заказы'), KeyboardButton(text='FAQ')]
-    ],
-    resize_keyboard=True,
-    input_field_placeholder='Выберите пункт меню.'
+main_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text='Каталог', callback_data='category_page')],
+        [InlineKeyboardButton(text='Корзина', callback_data='get_cart')],
+        [InlineKeyboardButton(text='Мои заказы', callback_data='get_orders')],
+        [InlineKeyboardButton(text='FAQ', callback_data='faq_page')]
+    ]
 )
+
 
 async def get_categories_keyboard(page: int = 1) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
@@ -24,6 +26,7 @@ async def get_categories_keyboard(page: int = 1) -> InlineKeyboardMarkup:
     total = len(categories)
 
     if total == 0:
+        await get_main_menu_button(builder)
         return builder.as_markup()
 
     offset = (page - 1) * ITEMS_PER_PAGE
@@ -44,6 +47,8 @@ async def get_categories_keyboard(page: int = 1) -> InlineKeyboardMarkup:
         'category'
     )
     if pagination: builder.row(*pagination)
+
+    await get_main_menu_button(builder)
 
     return builder.adjust(2).as_markup()
 
@@ -185,6 +190,8 @@ async def get_add_order_keyboard(items):
         builder.add(InlineKeyboardButton(text=f'Удалить {item.product.name}', callback_data=f'remove_cart_item_{item.id}'))
 
     builder.add(InlineKeyboardButton(text='Оформить заказ', callback_data='add_order'))
+    await get_main_menu_button(builder)
+
     return builder.adjust(2).as_markup()
 
 
@@ -206,6 +213,8 @@ async def get_paid_keyboard(order, is_back=False):
             callback_data=f'get_orders'
         ))
 
+    await get_main_menu_button(builder)
+
     return builder.adjust(2).as_markup()
 
 
@@ -216,5 +225,14 @@ async def get_orders_keyboard(orders):
             text=f'Заказ № {order.id} от {order.created_at.strftime("%d.%m.%Y")} {"Оплачен" if order.is_paid else "Не оплачен"}',
             callback_data=f'get_order_{order.id}'
         ))
+    await get_main_menu_button(builder)
 
+    return builder.adjust(1).as_markup()
+
+
+async def get_pay_keyboard(order: Order):
+    builder = InlineKeyboardBuilder()
+    if not order.is_paid:
+        builder.add(InlineKeyboardButton(text='СБП', callback_data=f'pay_sbp_{order.id}'))
+    await get_main_menu_button(builder)
     return builder.adjust(1).as_markup()

@@ -2,12 +2,11 @@ import asyncio
 
 from aiogram import Dispatcher
 
-from bot.handlers.user import router
+from bot.handlers.user import router as user_router
+from bot.handlers.faq import router as faq_router
 from bot.loader import bot, dp
 from bot.middlewares import middleware_list
 from core.settings import logging_bot as log
-
-
 
 
 async def _on_shutdown(dispatcher: Dispatcher):
@@ -21,7 +20,8 @@ def run_bot():
     """Запускает бота."""
     log.info('Bot started!')
 
-    dp.include_router(router)
+    dp.include_router(user_router)
+    dp.include_router(faq_router)
 
     for middleware in middleware_list:
         dp.message.outer_middleware(middleware)

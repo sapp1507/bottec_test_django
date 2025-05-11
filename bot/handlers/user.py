@@ -1,7 +1,8 @@
 from aiogram import F, Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, FSInputFile, Message
+from aiogram.types import (CallbackQuery, FSInputFile, InlineKeyboardButton,
+                           Message)
 
 from bot.keyboards import user as kb
 from bot.states.user import OrderStates
@@ -16,29 +17,31 @@ router = Router()
 async def start(message: Message, state: FSMContext):
     await state.clear()
     await message.answer('Привет! Выбери пункт меню.',
-                         reply_markup=kb.user_keyboard)
+                         reply_markup=kb.main_keyboard)
 
 
-@router.message(F.text == 'Каталог')
-async def get_param(message: Message):
-    await message.answer(
-        f'Выберите категорию:',
-        reply_markup=await kb.get_categories_keyboard()
+@router.callback_query(F.data.startswith('main_menu'))
+async def main_menu(callback: CallbackQuery):
+    await callback.message.answer(
+        'Привет! Выбери пункт меню.',
+        reply_markup=kb.main_keyboard
     )
-    await message.delete()
+    await callback.message.delete()
 
 
-@router.message(F.text == 'Корзина')
-async def get_cart(message: Message):
-    user_id = message.from_user.id if not message.from_user.is_bot else message.chat.id
+@router.callback_query(F.data.startswith('get_cart'))
+async def get_cart(callback: CallbackQuery):
+    user_id = callback.message.from_user.id if not callback.message.from_user.is_bot else callback.message.chat.id
     user = await TGUser.objects.filter(user_id=user_id).prefetch_related('cart__items__product').afirst()
     items = user.cart.items.all()
     total_price = 0
     message_answer = ''
     if not items:
-        await message.answer(
-            'Корзина пуста'
+        await callback.message.answer(
+            'Корзина пуста',
+            reply_markup=kb.main_keyboard
         )
+        await callback.message.delete()
         return
     for item in items:
         total_price += item.price
@@ -53,50 +56,39 @@ async def get_cart(message: Message):
     message_answer = message_answer + (
             '<b>Общая сумма: ' + to_rub(total_price) + 'р.</b>'
     )
-    await message.answer(
+    await callback.message.answer(
         message_answer,
         reply_markup=await kb.get_add_order_keyboard(items)
     )
-    await message.delete()
+    await callback.message.delete()
 
 
-@router.callback_query(F.data.startswith('get_cart'))
-async def get_cart_in_product(callback: CallbackQuery):
-    await get_cart(callback.message)
 
-
-@router.message(F.text == 'FAQ')
-async def get_faq(message: Message):
-    await message.answer(
-        'FAQ'
-    )
-    await message.delete()
-
-
-@router.message(F.text == 'Мои заказы')
-async def get_orders(message: Message):
-    user_id = message.from_user.id if not message.from_user.is_bot else message.chat.id
-    user = await TGUser.objects.filter(user_id=user_id).prefetch_related('orders__items__product').afirst()
-    orders = user.orders.all()
-    await message.answer(
-        'Список заказов',
-        reply_markup=await kb.get_orders_keyboard(orders)
-    )
-    await message.delete()
 
 
 @router.callback_query(F.data.startswith('get_orders'))
 async def get_orders_callback(callback: CallbackQuery):
-    await get_orders(callback.message)
-
-
-@router.callback_query(F.data.startswith('category_page_'))
-async def get_category(callback: CallbackQuery):
-    page = int(callback.data.split('_')[2])
-    await callback.message.edit_text(
-        'Выбери категорию:',
-        reply_markup=await kb.get_categories_keyboard(page)
+    user_id = callback.message.from_user.id if not callback.message.from_user.is_bot else callback.message.chat.id
+    user = await TGUser.objects.filter(user_id=user_id).prefetch_related('orders__items__product').afirst()
+    orders = user.orders.all()
+    await callback.message.answer(
+        'Список заказов',
+        reply_markup=await kb.get_orders_keyboard(orders)
     )
+    await callback.message.delete()
+
+
+@router.callback_query(F.data.startswith('category_page'))
+async def get_category(callback: CallbackQuery):
+    params = callback.data.split('_')
+    page = 1
+    if len(params) == 3:
+        page = int(callback.data.split('_')[2])
+    await callback.message.answer(
+        'Выбери категорию:',
+        reply_markup= await kb.get_categories_keyboard(page)
+    )
+    await callback.message.delete()
 
 
 @router.callback_query(F.data.startswith('category_'))
@@ -201,7 +193,7 @@ async def remove_cart_item(callback: CallbackQuery):
             await cart_item.adelete()
         else:
             await cart_item.asave()
-        await get_cart(callback.message)
+        await get_cart(callback)
     else:
         await callback.message.edit_reply_markup(
             reply_markup=await kb.remove_cart_item_quantity(cart_item)
@@ -270,8 +262,10 @@ async def get_phone_number(message: Message, state: FSMContext):
 async def paid(callback: CallbackQuery):
     order_id = int(callback.data.split('_')[1])
     order = await Order.objects.filter(id=order_id).afirst()
+
     await callback.message.answer(
-        'Заказ оплачен(тут прикрутить платежку)'
+        'Заказ оплачен(тут прикрутить платежку)',
+        reply_markup=await kb.get_pay_keyboard(order)
     )
     await callback.message.delete()
 
@@ -305,7 +299,20 @@ async def get_order(callback: CallbackQuery):
     )
     await callback.message.answer(
         message_answer,
-        reply_markup=await kb.get_paid_keyboard(order, True) if not order.is_paid else None
+        reply_markup=await kb.get_paid_keyboard(order, True)
+    )
+    await callback.message.delete()
+
+
+@router.callback_query(F.data.startswith('pay_sbp'))
+async def pay_sbp(callback: CallbackQuery):
+    order_id = int(callback.data.split('_')[2])
+    order = await Order.objects.filter(id=order_id).afirst()
+    order.is_paid = True
+    await order.asave()
+    await callback.message.answer(
+        'Заказ оплачен',
+        reply_markup=await kb.get_pay_keyboard(order)
     )
     await callback.message.delete()
 

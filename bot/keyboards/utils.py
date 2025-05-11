@@ -34,9 +34,17 @@ async def build_pagination_button(
 async def add_back_button(
         builder: InlineKeyboardBuilder,
         model_name: str,
-        parent_id: Optional[int] = None
+        parent_id: Optional[int] = None,
+        is_main_button: bool = False
 ):
     """Добавляет кнопку Назад"""
+    if is_main_button:
+        builder.row(
+            InlineKeyboardButton(
+                text='Главное меню',
+                callback_data='main_menu'
+            )
+        )
     if not parent_id:
         return
 
@@ -45,6 +53,8 @@ async def add_back_button(
         back_data = f'category_{parent_id}_page_1'
     elif model_name == 'products':
         back_data = f'subcategory_{parent_id}_page_1'
+    elif model_name == 'faq':
+        back_data = f'faq_page_1'
     builder.row(
         InlineKeyboardButton(
             text='↩️ Назад',

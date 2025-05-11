@@ -41,10 +41,12 @@ class FAQItem(TimeModel):
         FAQCategory,
         on_delete=models.CASCADE,
         verbose_name='Категория',
-        related_name='faq_items'
+        related_name='faq_items',
+        blank=True,
+        null=True
     )
     question = models.CharField(max_length=255, verbose_name='Вопрос')
-    answer = models.TextField(verbose_name='Ответ')
+    answer = models.TextField(verbose_name='Ответ', blank=True, null=True)
     is_active = models.BooleanField(default=True, verbose_name='Активно')
     priority = models.IntegerField(default=0, verbose_name='Приоритет сортировки')
 
