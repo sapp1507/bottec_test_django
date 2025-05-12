@@ -1,7 +1,7 @@
 from typing import Any, Awaitable, Callable, Dict, Optional
 
 from aiogram import BaseMiddleware
-from aiogram.enums import ChatMemberStatus
+from aiogram.enums import ChatMemberStatus, ChatType
 from aiogram.types import TelegramObject, User
 from django.utils.html import avoid_wrapping
 
@@ -19,7 +19,12 @@ class UserMiddleware(BaseMiddleware):
                        event: TelegramObject,
                        data:Dict[str, Any]
                        ):
+
+        if hasattr(event, 'chat') and event.chat.type == ChatType.SUPERGROUP:
+            return
+
         tg_user: Optional[User] = self._extract_user(event)
+
         if tg_user:
             user = await self._update_or_create_user(tg_user)
             user_channel_status = await bot.get_chat_member(

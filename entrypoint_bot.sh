@@ -12,4 +12,4 @@ printenv >> /etc/environment
 apt-get update && apt-get install -y cron rsyslog
 chmod 644 /etc/cron.d/config
 import_env
-cron && python /django/manage.py runbot
+cron && python manage.py runbot

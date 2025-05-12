@@ -16,4 +16,4 @@ RUN pip install -r requirements.txt --no-cache-dir
 COPY . .
 RUN chmod +x entrypoint_django.sh
 RUN chmod +x entrypoint_bot.sh
-CMD["/bin/bash", "./entrypoint_django.sh"]
+CMD ["/bin/bash", "./entrypoint_django.sh"]

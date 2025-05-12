@@ -29,13 +29,13 @@ if not os.path.exists(MEDIA_ROOT):
 
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'daphne',
     'channels',
     'core',
     'faq',
@@ -108,5 +108,8 @@ USE_TZ = True
 
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
+if not os.path.exists(STATIC_ROOT):
+    os.makedirs(STATIC_ROOT)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

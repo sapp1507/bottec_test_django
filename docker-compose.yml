@@ -12,9 +12,11 @@ services:
       - './cronjob:/etc/cron.d'
     env_file:
       - ./.env
+    entrypoint: ./entrypoint_django.sh
   bot:
     <<: *django
     container_name: bot
     depends_on:
       - django
+    ports: []
     entrypoint: ./entrypoint_bot.sh
