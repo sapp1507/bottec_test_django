@@ -16,7 +16,7 @@ environ.Env.read_env(env_file)
 
 SECRET_KEY = os.getenv('SECRET_KEY', None)
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', False) in ['True', 'true', '1']
 
 if not DEBUG:
     icecream.ic.disable()
@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'daphne',
+    'channels',
     'core',
     'faq',
     'mailing',
@@ -70,7 +72,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
-
+ASGI_APPLICATION = 'core.asgi.application'
 
 DATABASES = {
     'default': {

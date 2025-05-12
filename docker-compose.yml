@@ -1,0 +1,20 @@
+version: '3.7'
+services:
+  django:
+    &django
+    container_name: django
+    restart: always
+    build: ./
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - './:/backend'
+      - './cronjob:/etc/cron.d'
+    env_file:
+      - ./.env
+  bot:
+    <<: *django
+    container_name: bot
+    depends_on:
+      - django
+    entrypoint: ./entrypoint_bot.sh
