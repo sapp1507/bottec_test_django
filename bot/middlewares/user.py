@@ -5,7 +5,8 @@ from aiogram.enums import ChatMemberStatus
 from aiogram.types import TelegramObject, User
 from django.utils.html import avoid_wrapping
 
-from bot.loader import GROUP_CHAT_ID, bot
+from bot.loader import bot
+from core.settings import GROUP_CHAT_ID
 from orders.models import Cart, TGUser
 
 last_messages_ids = {}
