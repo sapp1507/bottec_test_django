@@ -21,7 +21,9 @@ DEBUG = os.getenv('DEBUG', False) in ['True', 'true', '1']
 if not DEBUG:
     icecream.ic.disable()
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 if not os.path.exists(MEDIA_ROOT):
@@ -107,7 +109,7 @@ USE_I18N = True
 USE_TZ = True
 
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 if not os.path.exists(STATIC_ROOT):
     os.makedirs(STATIC_ROOT)

@@ -13,6 +13,8 @@ services:
     env_file:
       - ./.env
     entrypoint: ./entrypoint_django.sh
+    networks:
+      - nginx_proxy
   bot:
     <<: *django
     container_name: bot
@@ -20,3 +22,24 @@ services:
       - django
     ports: []
     entrypoint: ./entrypoint_bot.sh
+  nginx:
+    container_name: nginx
+    restart: always
+    build: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - /etc/nginx
+      - ./static:/static
+      - ./run:/socks
+    env_file:
+      - .env
+    networks:
+      - nginx_proxy
+    depends_on:
+      - django
+      - bot
+networks:
+  nginx_proxy:
+    name: nginx_proxy
+
