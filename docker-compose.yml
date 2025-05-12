@@ -29,8 +29,9 @@ services:
     ports:
       - "80:80"
     volumes:
-      - /etc/nginx
-      - ./static:/static
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./static:/django/static
+      - ./media:/django/media
       - ./run:/socks
     env_file:
       - .env

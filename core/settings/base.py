@@ -28,6 +28,7 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 if not os.path.exists(MEDIA_ROOT):
     os.makedirs(MEDIA_ROOT)
+MEDIA_URL = '/media/'
 
 
 INSTALLED_APPS = [
