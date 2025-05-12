@@ -1,9 +1,10 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from orders.models import TGUser
+from utils.models import TimeModel
 
 
-class MailingCampaign(models.Model):
+class MailingCampaign(TimeModel):
     class CampaignType(models.TextChoices):
         TEXT = 'text', 'Текстовая рассылка'
         PHOTO = 'photo', 'Фото + текст'
@@ -18,7 +19,6 @@ class MailingCampaign(models.Model):
     target_groups = models.ManyToManyField(TGUser, verbose_name='Целевые группы', blank=True)
     is_active = models.BooleanField('Активна', default=True)
     scheduled_time = models.DateTimeField('Время отправки', null=True, blank=True)
-    created_at = models.DateTimeField('Создана', auto_now_add=True)
     is_completed = models.BooleanField('Завершена', default=False)
 
     def __str__(self):
@@ -32,7 +32,7 @@ class MailingCampaign(models.Model):
         ]
 
 
-class MailingLog(models.Model):
+class MailingLog(TimeModel):
     class Status(models.TextChoices):
         PENDING = 'pending', 'В ожидании'
         SENT = 'sent', 'Отправлено'

@@ -70,8 +70,8 @@ class Product(TimeModel, NameModel):
     )
     description = models.TextField(null=True, blank=True)
     photo = models.ImageField(upload_to='products/', null=True, blank=True)
-    price = models.IntegerField()
-    count = models.IntegerField()
+    price = models.IntegerField(verbose_name='Цена в копейках')
+    count = models.IntegerField(verbose_name='Кол-во')
     is_available = models.BooleanField(default=True, verbose_name='Доступен')
 
     class Meta:

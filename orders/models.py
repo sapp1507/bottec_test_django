@@ -133,7 +133,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name='Заказ', related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Товар', related_name='order_items')
     quantity = models.PositiveIntegerField(default=1, verbose_name='Количество')
-    product_price = models.IntegerField(verbose_name='Цена товара')
+    product_price = models.IntegerField(verbose_name='Цена товара в копейках')
 
     @property
     def price(self):
